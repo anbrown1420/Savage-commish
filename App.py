@@ -3,42 +3,42 @@ import google.generativeai as genai
 from PIL import Image
 
 # 1. Page Config
-st.set_page_config(page_title="Savage Commish", page_icon="🏈")
-st.title("🔥 Savage Commish")
+st.set_page_config(page_title="Savage Commish Diagnostic", page_icon="🕵️")
+st.title("🕵️ Savage Commish: Model Scout")
 
 # 2. Secret Key Setup
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=api_key)
-    # Using the universal stable alias with the 'models/' prefix
-    model = genai.GenerativeModel('models/gemini-1.5-flash')
 else:
     st.error("Missing API Key! Add GEMINI_API_KEY to your Streamlit Secrets.")
     st.stop()
 
-# 3. UI logic
-st.write("Upload a screenshot of your league scoreboard.")
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+# --- DIAGNOSTIC SECTION ---
+st.subheader("1. Run Diagnostic")
+if st.button("List My Available Models"):
+    try:
+        models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+        st.success("Models found! Copy one of these exactly:")
+        for m_name in models:
+            st.code(m_name)
+    except Exception as e:
+        st.error(f"Could not list models: {e}")
 
-if uploaded_file is not None:
+st.divider()
+
+# --- MAIN APP SECTION ---
+st.subheader("2. Test a Model Name")
+model_name = st.text_input("Paste the model name from above here:", value="models/gemini-1.5-flash")
+
+uploaded_file = st.file_uploader("Upload screenshot", type=["jpg", "jpeg", "png"])
+
+if uploaded_file and st.button("Generate Roast"):
     image = Image.open(uploaded_file)
-    st.image(image, caption='The Evidence', use_column_width=True)
-    
-    if st.button("Generate Savage Roast"):
-        with st.spinner('AI is analyzing your failure...'):
-            try:
-                prompt = """
-                You are a toxic, hilarious Fantasy Sports Commissioner. 
-                Look at this screenshot and write a 3-paragraph savage roast. 
-                Identify the biggest loser, mock specific players/points, 
-                and use aggressive sports slang. Check the benched players and missed points. Be mean.
-                """
-                # Send image and prompt to Gemini
-                response = model.generate_content([prompt, image])
-                
-                st.subheader("The Verdict:")
-                st.write(response.text)
-                st.text_area("Copy for Group Chat", value=response.text, height=150)
-                
-            except Exception as e:
-                st.error(f"Error: {e}")
+    try:
+        # Use the name typed in the box
+        test_model = genai.GenerativeModel(model_name)
+        response = test_model.generate_content(["Roast this fantasy sports screenshot.", image])
+        st.write(response.text)
+    except Exception as e:
+        st.error(f"Failed with {model_name}: {e}")
