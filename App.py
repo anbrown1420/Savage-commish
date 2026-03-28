@@ -11,7 +11,7 @@ st.title("🔥 Savage Commish: AI Vision Roast")
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash-latest')
+    model = genai.GenerativeModel('gemini-3-flash-latest')
 else:
     st.error("Missing API Key! Go to Settings -> Secrets and add GEMINI_API_KEY.")
     st.stop()
