@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-# 1. Page Config (Standard Look)
+# 1. Page Config
 st.set_page_config(page_title="Savage Commish", page_icon="🏈")
 st.title("🔥 Savage Commish")
 
@@ -14,36 +14,40 @@ else:
     st.error("Missing API Key! Add GEMINI_API_KEY to your Streamlit Secrets.")
     st.stop()
 
-# 3. Sidebar Configuration
-with st.sidebar:
-    st.title("⚙️ App Settings")
-    
-    # Re-adding the manual model selection box
-    model_choice = st.text_input(
-        "AI Model Name:", 
-        value="models/gemini-1.5-flash",
-        help="Use 'models/gemini-1.5-flash' or 'models/gemini-3-flash' based on what worked in your diagnostic."
-    )
-    
-    personality = st.selectbox(
-        "Choose Your Roast Level:",
-        ["Toxic Commish", "Drunk Uncle", "Stat Nerd", "Angry Gambling Addict", "Patronizing Mom"]
-    )
-    
-    st.divider()
-    st.info("Upload a screenshot and let the AI do the rest.")
+# --- SECTION 1: MODEL SCOUT (DIAGNOSTIC) ---
+st.subheader("1. Model Scout")
+st.write("If you get a 404 error, click this to see which names your API key currently supports.")
+if st.button("List My Available Models"):
+    try:
+        models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+        st.success("Models found! Copy one of these exactly:")
+        for m_name in models:
+            st.code(m_name)
+    except Exception as e:
+        st.error(f"Could not list models: {e}")
 
-# 4. Personality Logic
+st.divider()
+
+# --- SECTION 2: THE ROAST MACHINE ---
+st.subheader("2. The Roast Machine")
+
+# Manual Model Input (Right on the home page)
+model_choice = st.text_input("Paste your model name here:", value="models/gemini-1.5-flash")
+
+# Personality Picker
+personality = st.selectbox(
+    "Choose Your Roast Level:",
+    ["Toxic Commish", "Drunk Uncle", "Stat Nerd", "Angry Gambling Addict", "Patronizing Mom"]
+)
+
+# Personality Logic
 prompts = {
     "Toxic Commish": "You are a toxic, hilarious fantasy sports commissioner. Use heavy slang like 'fraud watch', 'cooked', and 'absolute burger'. Be aggressive and identify the biggest loser.",
-    "Drunk Uncle": "You are a drunk uncle who thinks sports were better in the 90s. Complain about modern players being soft while roasting this specific lineup/score.",
+    "Drunk Uncle": "You are a drunk uncle who thinks sports were better in the 90s. Complain about modern players being soft while roasting this specific lineup and the owner's life choices.",
     "Stat Nerd": "You are a condescending math nerd. Use 'advanced metrics' and 'expected points' to mathematically prove why this user is a failure.",
-    "Angry Gambling Addict": "You are a high-stakes gambler who just lost a massive parlay because of the losing team in this image. You are FURIOUS, use caps lock for emphasis, and blame the players personally.",
-    "Patronizing Mom": "You are a 'helpful' mom who knows nothing about sports. Be incredibly nice but deeply embarrassing. Talk about how 'proud' you are of them for trying their best even though they lost so badly."
+    "Angry Gambling Addict": "You are a high-stakes gambler who just lost a massive parlay because of the losing team in this image. You are FURIOUS, use caps lock for emphasis, and blame the players personally for your financial ruin.",
+    "Patronizing Mom": "You are a 'helpful' mom who knows nothing about sports. Be incredibly nice but deeply embarrassing. Talk about how 'proud' you are of them for trying their best even though they lost so badly and mention bringing orange slices."
 }
-
-# 5. Main UI
-st.write(f"Current Persona: **{personality}**")
 
 uploaded_file = st.file_uploader("Upload Scoreboard Screenshot", type=["jpg", "jpeg", "png"])
 
@@ -54,7 +58,7 @@ if uploaded_file is not None:
     if st.button(f"ROAST AS {personality.upper()}"):
         with st.spinner('AI is generating the disrespect...'):
             try:
-                # Initialize the model using the manual string from the sidebar
+                # Initialize the model using the manual string
                 model = genai.GenerativeModel(model_choice)
                 
                 base_prompt = f"{prompts[personality]} Look at this screenshot, identify the teams/players and scores, and write 3 savage paragraphs."
@@ -71,3 +75,5 @@ if uploaded_file is not None:
                 
             except Exception as e:
                 st.error(f"Error with model '{model_choice}': {e}")
+
+st.caption("v2.5 Stable - 2026 Build")
