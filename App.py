@@ -31,7 +31,7 @@ st.divider()
 # --- SECTION 2: THE ROAST MACHINE ---
 st.subheader("2. The Roast Machine")
 
-model_choice = st.text_input("Paste your model name here:", value="models/gemini-1.5-flash")
+model_choice = st.text_input("Paste your model name here:", value="models/gemini-2.5-flash-lite")
 personality = st.selectbox(
     "Choose Your Roast Level:",
     ["Toxic Commish", "Drunk Uncle", "Stat Nerd", "Angry Gambling Addict", "Patronizing Mom"]
