@@ -61,7 +61,7 @@ if uploaded_file is not None:
                 # Initialize the model using the manual string
                 model = genai.GenerativeModel(model_choice)
                 
-                base_prompt = f"{prompts[personality]} Look at this screenshot, identify the teams/players and scores, identify the biggest missed opportunities, and heartbrreaks from the latest news on the players, and write 1 savage paragraph."
+                base_prompt = f"{prompts[personality]} Look at this screenshot, identify the teams/players and scores, identify the biggest missed opportunities, and heartbreaks, the latest news on the players on the team,and write 3 savage paragraphs."
                 
                 response = model.generate_content([base_prompt, image])
                 
