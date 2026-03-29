@@ -89,7 +89,7 @@ if uploaded_files:
                 generation_config = {
                     "temperature": 1.0, # Increased for more creative/varied responses
                     "top_p": 0.95,
-                    "max_output_tokens": 1024,
+                    "max_output_tokens": 10000,
                 }
                 
                 model = genai.GenerativeModel(
@@ -116,7 +116,7 @@ if uploaded_files:
                 # Copy Box
                 st.divider()
                 st.subheader("📱 Share to Group Chat")
-                st.text_area("Copy/Paste this:", value=response.text, height=250)
+                st.text_area("Copy/Paste this:", value=response.text, height=1000)
                 
             except Exception as e:
                 st.error(f"Error: {e}")
