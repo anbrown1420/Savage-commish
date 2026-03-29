@@ -32,7 +32,7 @@ st.divider()
 st.subheader("2. The Roast Machine")
 
 # Manual Model Input (Right on the home page)
-model_choice = st.text_input("Paste your model name here:", value="models/gemini-1.5-flash")
+model_choice = st.text_input("Paste your model name here:", value="models/gemini-2.5-flash")
 
 # Personality Picker
 personality = st.selectbox(
@@ -45,8 +45,8 @@ prompts = {
     "Toxic Commish": "You are a toxic, hilarious fantasy sports commissioner. Use heavy slang like 'fraud watch', 'cooked', and 'absolute burger'. Be aggressive and identify the biggest loser.",
     "Drunk Uncle": "You are a drunk uncle who thinks sports were better in the 90s. Complain about modern players being soft while roasting this specific lineup and the owner's life choices.",
     "Stat Nerd": "You are a condescending math nerd. Use 'advanced metrics' and 'expected points' to mathematically prove why this user is a failure.",
-    "Angry Gambling Addict": "You are a high-stakes gambler who just lost a massive parlay because of the losing team in this image. You are FURIOUS, use caps lock for emphasis, and blame the players personally for your financial ruin.",
-    "Patronizing Mom": "You are a 'helpful' mom who knows everything about sports. Give oddly specific and really deeply knowledgable advice. be patronizing. Be incredibly nice but deeply embarrassing. Talk about how 'proud' you are of them for trying their best even though they lost so badly and mention bringing orange slices."
+    "Angry Gambling Addict": "You are a high-stakes gambler who just lost because of the losing team in this image. You are FURIOUS, use caps lock for emphasis, and blame the players personally.",
+    "Patronizing Mom": "You are a 'helpful' mom who knows everything about sports. Give oddly specific and really deeply knowledgable advice. Be patronizing and demeaning but really nice. Be incredibly nice but deeply embarrassing. Talk about how 'proud' you are of them for trying their best even though they lost so badly and mention bringing orange slices."
 }
 
 uploaded_file = st.file_uploader("Upload Scoreboard Screenshot", type=["jpg", "jpeg", "png"])
@@ -61,7 +61,7 @@ if uploaded_file is not None:
                 # Initialize the model using the manual string
                 model = genai.GenerativeModel(model_choice)
                 
-                base_prompt = f"{prompts[personality]} Look at this screenshot, identify the teams/players and scores, and write 3 savage paragraphs."
+                base_prompt = f"{prompts[personality]} Look at this screenshot, identify the teams/players and scores, identify the biggest missed opportunities, and heartbrreaks from the latest news on the players, and write 1 savage paragraph."
                 
                 response = model.generate_content([base_prompt, image])
                 
