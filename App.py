@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
+import io
 
 # 1. Page Config
 st.set_page_config(page_title="Savage Commish", page_icon="🏈")
@@ -14,9 +15,8 @@ else:
     st.error("Missing API Key! Add GEMINI_API_KEY to your Streamlit Secrets.")
     st.stop()
 
-# --- SECTION 1: MODEL SCOUT (DIAGNOSTIC) ---
+# --- SECTION 1: MODEL SCOUT ---
 st.subheader("1. Model Scout")
-st.write("If you get a 404 error, click this to see which names your API key currently supports.")
 if st.button("List My Available Models"):
     try:
         models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
@@ -31,49 +31,64 @@ st.divider()
 # --- SECTION 2: THE ROAST MACHINE ---
 st.subheader("2. The Roast Machine")
 
-# Manual Model Input (Right on the home page)
-model_choice = st.text_input("Paste your model name here:", value="models/gemini-2.5-flash")
-
-# Personality Picker
+model_choice = st.text_input("Paste your model name here:", value="models/gemini-1.5-flash")
 personality = st.selectbox(
     "Choose Your Roast Level:",
     ["Toxic Commish", "Drunk Uncle", "Stat Nerd", "Angry Gambling Addict", "Patronizing Mom"]
 )
 
-# Personality Logic
 prompts = {
-    "Toxic Commish": "You are a toxic, hilarious fantasy sports commissioner. Use heavy slang like 'fraud watch', 'cooked', and 'absolute burger'. Be aggressive and identify the biggest loser.",
-    "Drunk Uncle": "You are a drunk uncle who thinks sports were better in the 90s. Complain about modern players being soft while roasting this specific lineup and the owner's life choices.",
-    "Stat Nerd": "You are a condescending math nerd. Use 'advanced metrics' and 'expected points' to mathematically prove why this user is a failure.",
-    "Angry Gambling Addict": "You are a high-stakes gambler who just lost because of the losing team in this image. You are FURIOUS, use caps lock for emphasis, and blame the players personally.",
-    "Patronizing Mom": "You are a 'helpful' mom who knows everything about sports. Give oddly specific and really deeply knowledgable advice. Be patronizing and demeaning but really nice. Be incredibly nice but deeply embarrassing. Talk about how 'proud' you are of them for trying their best even though they lost so badly and mention bringing orange slices."
+    "Toxic Commish": "You are a toxic fantasy commissioner. Use slang like 'fraud watch' and 'cooked'.",
+    "Drunk Uncle": "You are a drunk uncle who thinks modern sports are soft. Roast this lineup.",
+    "Stat Nerd": "You are a condescending math nerd. Prove they are a failure with fake math.",
+    "Angry Gambling Addict": "You are FURIOUS. You lost your parlay and your mortgage. Use CAPS LOCK.",
+    "Patronizing Mom": "Be incredibly nice but deeply embarrassing. Bring up orange slices."
 }
 
 uploaded_file = st.file_uploader("Upload Scoreboard Screenshot", type=["jpg", "jpeg", "png"])
+
+# Use Session State to "remember" the roast so we can make a meme from it
+if 'current_roast' not in st.session_state:
+    st.session_state.current_roast = None
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     st.image(image, caption='The Evidence', use_column_width=True)
     
     if st.button(f"ROAST AS {personality.upper()}"):
-        with st.spinner('AI is generating the disrespect...'):
+        with st.spinner('Generating disrespect...'):
             try:
-                # Initialize the model using the manual string
                 model = genai.GenerativeModel(model_choice)
-                
-                base_prompt = f"{prompts[personality]} Look at this screenshot, identify the teams/players and scores, identify the biggest missed opportunities, and heartbreaks, the latest news on the players on the team,and write 3 savage paragraphs."
-                
+                base_prompt = f"{prompts[personality]} Look at this screenshot and write 3 savage paragraphs."
                 response = model.generate_content([base_prompt, image])
+                st.session_state.current_roast = response.text
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+# --- SECTION 3: THE MEME GENERATOR (New!) ---
+if st.session_state.current_roast:
+    st.subheader("The Verdict:")
+    st.write(st.session_state.current_roast)
+    
+    st.divider()
+    st.subheader("🎨 Meme Laboratory")
+    st.write("Turn this roast into a visual masterpiece.")
+    
+    if st.button("🖼️ Generate Meme Image"):
+        with st.spinner('Painting your failure...'):
+            try:
+                # We use the Imagen model (which is part of the Gemini SDK in 2026)
+                # If your tier doesn't support 'imagen-3', this will use the text-to-image alias
+                meme_model = genai.GenerativeModel('imagen-3') 
                 
-                st.subheader("The Verdict:")
-                st.write(response.text)
+                meme_prompt = f"A hilarious, high-quality meme image based on this roast: {st.session_state.current_roast}. Make it cinematic, funny, and exaggerated."
                 
-                # Copy Box
-                st.divider()
-                st.subheader("📱 Share to Group Chat")
-                st.text_area("Copy/Paste this:", value=response.text, height=200)
+                # In 2026, generate_content returns the image directly for Imagen models
+                result = meme_model.generate_content(meme_prompt)
+                
+                # Display the generated meme
+                st.image(result.images[0], caption="Generated by Savage AI", use_column_width=True)
                 
             except Exception as e:
-                st.error(f"Error with model '{model_choice}': {e}")
-
-st.caption("v2.5 Stable - 2026 Build")
+                st.warning("Image Generation isn't active on this specific API Key tier yet, but here is a 'Visual Description' for you to use on a meme site:")
+                st.info(f"Meme Idea: {st.session_state.current_roast[:100]}... [Visual: A clown holding a 'Participant' trophy in a rainstorm]")
