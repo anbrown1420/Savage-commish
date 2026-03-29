@@ -32,7 +32,7 @@ st.divider()
 st.subheader("2. The Roast Machine")
 
 # Manual Model Input (Right on the home page)
-model_choice = st.text_input("Paste your model name here:", value="models/gemini-1.5-flash")
+model_choice = st.text_input("Paste your model name here:", value="models/gemini-2.5-flash")
 
 # Personality Picker
 personality = st.selectbox(
