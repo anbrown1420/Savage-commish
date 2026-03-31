@@ -38,12 +38,12 @@ model_choice = st.text_input("Model ID:", value="models/gemini-2.5-flash")
 # Personality Picker
 personality = st.selectbox(
     "Choose Your Executioner:",
-    ["Toxic Commish", "Drunk Uncle", "Stat Nerd", "Angry Gambling Addict", "Patronizing Mom"]
+    ["Savage Commish", "Drunk Uncle", "Stat Nerd", "Angry Gambling Addict", "Patronizing Mom"]
 )
 
 # Personality Logic - REFINED FOR CREATIVITY
 prompts = {
-    "Toxic Commish": (
+    "Savage Commish": (
         "Role: A ruthless, power-tripping league commissioner. "
         "Lingo: Use Gen-Z/Alpha slang mixed with corporate hate. Terms: 'fraud watch', 'cooked', 'absolute burger', 'zero aura', 'relegation material'. "
         "Goal: Publicly humiliate the owner. Call them a 'poverty franchise'. Mention how you're considering kicking them out of the league for this performance."
